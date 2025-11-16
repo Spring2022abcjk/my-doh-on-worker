@@ -18,9 +18,11 @@ jobs:
       - name: Create wrangler.toml
         run: |
           echo 'name = "doh"' > wrangler.toml
-          echo 'account_id = "${{ secrets.CF_ACCOUNT_ID }}"' >> wrangler.toml
+          echo "account_id = \"$CF_ACCOUNT_ID\"" >> wrangler.toml
           echo 'workers_dev = true' >> wrangler.toml
           echo 'compatibility_date = "2025-11-16"' >> wrangler.toml
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
 
       - name: Publish to Cloudflare
         run: wrangler publish
