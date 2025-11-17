@@ -17,5 +17,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          workingDirectory: src
-          command: deploy
+          workingDirectory: ./
+          command: deploy src/worker.js
