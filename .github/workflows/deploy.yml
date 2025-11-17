@@ -18,4 +18,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           workingDirectory: ./
-          command: deploy src/worker.js --name doh
+          command: deploy src/worker.js --name doh --compatibility-date 2025-11-17
