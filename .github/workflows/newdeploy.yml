@@ -31,6 +31,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           workingDirectory: ./
+          wranglerVersion: "4.21.0"
           # 使用 versions upload 只上传版本并创建 preview alias，不影响生产
           command: >
             versions upload
