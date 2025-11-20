@@ -35,7 +35,7 @@ jobs:
           # 使用 versions upload 只上传版本并创建 preview alias，不影响生产
           command: >
             versions upload
-            src/worker.js
+            --script src/worker.js
             --name ${{ env.WORKER_NAME }}
             --preview-alias ${{ steps.set-alias.outputs.alias }}
             --compatibility-date 2025-11-17
