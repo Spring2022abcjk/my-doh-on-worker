@@ -1,0 +1,63 @@
+name: Deploy DoH Worker
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  WORKER_NAME: doh
+  WORKERS_SUBDOMAIN: ${{ secrets.WORKERS_SUBDOMAIN }}
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      preview_alias: ${{ steps.set-alias.outputs.alias }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set preview alias
+        id: set-alias
+        run: |
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          ALIAS="preview-${SHORT_SHA}"
+          echo "alias=${ALIAS}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish version (preview) with Wrangler
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          workingDirectory: ./
+          # 使用 versions upload 只上传版本并创建 preview alias，不影响生产
+          command: >
+            versions upload
+            --preview-alias ${{ steps.set-alias.outputs.alias }}
+            src/worker.js
+            --name ${{ env.WORKER_NAME }}
+            --compatibility-date 2025-11-17
+
+      - name: Show expected preview URL
+        run: |
+          echo "Preview alias: ${{ steps.set-alias.outputs.alias }}"
+          echo "Preview URL: https://${{ steps.set-alias.outputs.alias }}-${{ env.WORKER_NAME }}.${{ env.WORKERS_SUBDOMAIN }}.workers.dev"
+
+  deploy:
+    needs: preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy with Wrangler to production
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          workingDirectory: ./
+          # 直接 deploy，会把当前代码（HEAD）发布到生产路由
+          command: deploy src/worker.js --name ${{ env.WORKER_NAME }} --compatibility-date 2025-11-17
