@@ -11,6 +11,7 @@ This document teaches AI coding agents how to be productive in this repo quickly
   - `src/ui/markup.js`: static HTML fragments (`formHTML`, `tabsHTML`, `tabContentHTML`, `pageShell`).
   - `src/ui/client.js`: front-end interactive JS packaged as a string by `clientScript(dohPathLiteral)`.
   - `wrangler.toml`: Cloudflare Wrangler config; name=`my-worker`, `workers_dev=true`, uses `CF_ACCOUNT_ID` from env.
+  - Test assets under `test/`: manual browser DoH test page (`test doh.html` + `test-doh-web.js` + stylesheet) supporting RFC8484 GET/POST, JSON, and a GET-only mode to bypass POST CORS issues.
 
 ## Runtime and routing
 - Worker exports `default.fetch(request, env)`.
@@ -18,6 +19,7 @@ This document teaches AI coding agents how to be productive in this repo quickly
 - Requests:
   - `OPTIONS`: CORS preflight with permissive headers.
   - `/{PATH}`: DoH endpoint handled by `DOHRequest` (supports GET name=..., GET dns= base64, and POST application/dns-message). Upstream defaults to Cloudflare: `https://cloudflare-dns.com/{resolve|dns-query}`.
+  - Root alias: `/` with `?dns=...` (RFC8484 base64url) or `?name=...` now also forwarded to `DOHRequest` for convenience.
   - `?doh=...&domain=...&type=all|A|AAAA|NS`: JSON DNS query via `queryDns`/`handleLocalDohRequest`, merging A/AAAA/NS and exposing `{ipv4.records, ipv6.records, ns.records}`.
   - `/ip-info?ip=1.2.3.4&token=TOKEN`: HTTP ip-api.com geolocation via Worker-side fetch; requires `env.TOKEN` if set.
   - Fallback: if `env.URL302` -> 302 redirect; else if `env.URL` -> reverse proxy via `代理URL` (supports comma/quote/newline-separated list and random pick). Special `env.URL='nginx'` returns canned nginx HTML. Otherwise returns UI HTML from `buildHTML()` in `htmlTemplate.js`.
@@ -28,6 +30,12 @@ This document teaches AI coding agents how to be productive in this repo quickly
 - `handleLocalDohRequest(domain, type)`: When `?doh` points to current host, it queries upstream `dnsDoH` directly and merges results for type=all.
 - Reverse proxy: `代理URL(代理网址, 目标网址)` builds new URL by combining upstream path with incoming path/query and forwards; `整理` parses multi-delimiter lists.
 - UI assets are now modularized: CSS/markup/client script under `src/ui/`; `buildHTML()` stitches them together. Worker passes `dohPath` and `upstreamHost`. UI still calls `./ip-info?ip=...&token=${PATH}`.
+ - Browser test page (`test doh.html` + `test-doh-web.js`):
+   - Builds raw DNS queries (fixed ID 0x1234, RD=1) and parses A/AAAA/NS/CNAME/SOA records.
+   - Modes: `all` (RFC8484 GET + POST + JSON), `binary` (GET + POST), `get-only` (only RFC8484 GET to avoid POST preflight CORS), `json` (only JSON API GET).
+   - Automatically creates missing DOM containers; robust against partial HTML edits.
+   - Adds fallback preview `(no answers)` when upstream returns 0 answer records.
+   - Query builder corrected (removed duplicated terminating 0x00 before QTYPE).
 
 ## Environment variables (Wrangler or Dashboard)
 - `DOH`: Upstream DoH base; host portion is extracted if a full URL is given.
@@ -45,10 +53,13 @@ This document teaches AI coding agents how to be productive in this repo quickly
 
 ## Conventions and gotchas
 - CORS: All JSON/DoH responses set `Access-Control-Allow-Origin: *` and preflight handler is permissive.
+   - Worker also adds `Access-Control-Allow-Methods: GET, POST, OPTIONS` and `Access-Control-Allow-Headers: *` to DNS JSON and HTML fallback responses.
 - DoH path token normalization: if PATH contains '/', only segment after first slash is used.
 - When `?doh` matches current host, use `handleLocalDohRequest` to avoid self-recursion.
 - NS results may appear under Answer or Authority; code collects both and includes SOA(type=6) in combined Answer for visibility.
 - UI highlights certain "blocked" IPs via hardcoded lists and still queries `/ip-info` for AS details.
+ - Some public DoH (e.g. `dns.google`) block browser POST CORS; use `get-only` mode or proxy through your Worker with `DOH` pointing upstream.
+ - For Google JSON API, endpoint is `https://dns.google/resolve` (not `/dns-query`).
 
 ## Make changes safely
 - Keep `fetch()` responses setting CORS headers.
@@ -64,9 +75,12 @@ This document teaches AI coding agents how to be productive in this repo quickly
 4. Server side variable injection: only via parameters passed to `buildHTML()`—avoid interpolating inside fragment files directly.
 5. For large refactors, consider moving client script out of string form and using a build step (not present yet) or serving it as a static asset via KV/R2 (future enhancement).
 - For upstream changes, adjust `DoH`, `jsonDoH`, `dnsDoH` patterns consistently.
+ - When extending test page functionality (perf stats, export JSON, more RR types), modify `test-doh-web.js`; keep minimal coupling with main Worker.
 
 ## Examples
 - DoH JSON: GET `/{PATH}?name=example.com&type=A` -> upstream JSON.
 - DNS multi-query: GET `/?doh=https%3A%2F%2Fdns.google%2Fresolve&domain=example.com&type=all`.
 - Geo API: GET `/ip-info?ip=8.8.8.8&token=${PATH}`.
+ - RFC8484 GET (browser test page): `https://cloudflare-dns.com/dns-query?dns=<base64url>`.
+ - GET-only mode (avoid POST CORS): select runMode=`get-only` in test page.
 

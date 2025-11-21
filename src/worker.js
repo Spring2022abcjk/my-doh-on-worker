@@ -36,6 +36,11 @@ export default {
       return await DOHRequest(request);
     }
 
+    // 兼容：允许直接在根路径使用 ?dns= 或 ?name= 发起 DoH 请求（别名）
+    if (path === "/" && (url.searchParams.has("dns") || url.searchParams.has("name"))) {
+      return await DOHRequest(request);
+    }
+
     // 添加IP地理位置信息查询代理
     if (path === "/ip-info") {
       if (env.TOKEN) {
@@ -239,13 +244,23 @@ export default {
           combinedResult.ns.records = nsRecords;
 
           return new Response(JSON.stringify(combinedResult, null, 2), {
-            headers: { "content-type": "application/json; charset=UTF-8" },
+            headers: {
+              "content-type": "application/json; charset=UTF-8",
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+              "Access-Control-Allow-Headers": "*",
+            },
           });
         } else {
           // 普通的单类型查询，使用新的查询函数
           const result = await queryDns(doh, domain, type);
           return new Response(JSON.stringify(result, null, 2), {
-            headers: { "content-type": "application/json; charset=UTF-8" },
+            headers: {
+              "content-type": "application/json; charset=UTF-8",
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+              "Access-Control-Allow-Headers": "*",
+            },
           });
         }
       } catch (err) {
@@ -262,7 +277,12 @@ export default {
             2
           ),
           {
-            headers: { "content-type": "application/json; charset=UTF-8" },
+            headers: {
+              "content-type": "application/json; charset=UTF-8",
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+              "Access-Control-Allow-Headers": "*",
+            },
             status: 500,
           }
         );
@@ -280,7 +300,12 @@ export default {
     } else {
       const html = buildHTML({ dohPath: DoH路径, upstreamHost: DoH });
       return new Response(html, {
-        headers: { "Content-Type": "text/html; charset=UTF-8" },
+        headers: {
+          "Content-Type": "text/html; charset=UTF-8",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "*",
+        },
       });
     }
   },

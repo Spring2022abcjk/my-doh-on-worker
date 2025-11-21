@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>DoH 测试面板 (浏览器)</title>
+    <link rel="stylesheet" href="样式testdoh.css">
+</head>
+
+<body>
+    <div class="panel">
+        <h1>DNS-over-HTTPS 浏览器测试面板</h1>
+        <p style="margin-top:-4px;font-size:12px;color:#4b5563">在浏览器中直接发起 RFC8484 / JSON DoH 请求，对比延迟与可用性。部分服务可能因 CORS
+            或安全策略拒绝 <code>application/dns-message</code> 请求。</p>
+        <div class="grid">
+            <div>
+                <label>DoH 端点 (基础 URL)</label>
+                <input id="endpoint" value="https://cloudflare-dns.com/dns-query" />
+            </div>
+            <div>
+                <label>测试域名</label>
+                <input id="domain" value="example.com" />
+            </div>
+            <div>
+                <label>记录类型 (QTYPE)</label>
+                <select id="qtype">
+                    <option value="A" selected>A</option>
+                    <option value="AAAA">AAAA</option>
+                    <option value="NS">NS</option>
+                    <option value="CNAME">CNAME</option>
+                </select>
+            </div>
+            <div>
+                <label>运行选项</label>
+                <select id="runMode">
+                    <option value="all" selected>全部 (GET/POST/JSON)</option>
+                    <option value="binary">仅 RFC8484 (GET+POST)</option>
+                    <option value="get-only">仅 RFC8484 GET</option>
+                    <option value="json">仅 JSON</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+            <button id="runBtn">开始测试</button>
+            <button id="clearBtn" class="secondary">清空结果</button>
+            <button id="rawBtn" class="secondary">查看最后原始 DNS 响应</button>
+        </div>
+        <div id="statusLine" style="font-size:12px;color:#374151;margin-bottom:4px;"></div>
+        <table id="resultTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th style="width:180px;">协议</th>
+                    <th style="width:80px;">状态</th>
+                    <th style="width:100px;">耗时(ms)</th>
+                    <th style="width:120px;">内容类型</th>
+                    <th>摘要</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+        </table>
+        <details id="answersBlock" style="display:none;">
+            <summary>解析答案详情</summary>
+            <div id="answers"></div>
+        </details>
+        <details id="rawBlock" style="display:none;">
+            <summary>原始响应预览</summary>
+            <pre id="rawData"></pre>
+        </details>
+        <div class="footer">Made for quick DoH manual testing. 二进制解析逻辑仅覆盖常见 A/AAAA 等资源记录，未完整实现全部 RR 类型。</div>
+    </div>
+    <script src="./test-doh-web.js"></script>
+</body>
+
+</html>
