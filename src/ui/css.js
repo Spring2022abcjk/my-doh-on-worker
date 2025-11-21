@@ -1,13 +1,383 @@
 // 基础样式抽离，便于单独维护
-export const baseCSS = `body{font-family:'Segoe UI',sans-serif;background:#f7f7f7;margin:0;padding:24px;}
-.container{max-width:880px;margin:0 auto;background:#fff;border-radius:14px;padding:30px 32px;box-shadow:0 8px 28px rgba(0,0,0,.08);}
-pre{background:#faf8f6;padding:14px;border-radius:6px;font-size:13px;}
-.ip-record{padding:6px 10px;border:1px solid #eee;border-radius:6px;margin-bottom:6px;background:#fff;}
-.ip-address{font-family:monospace;cursor:pointer;position:relative;}
-.ip-address.copied:after{content:'已复制';position:absolute;left:100%;margin-left:8px;color:#f15c2e;font-size:12px;}
-.badge{font-size:11px;}
-.geo-loading{font-style:italic;color:#999;}
-.geo-blocked{background:#dc3545;color:#fff;padding:2px 6px;border-radius:4px;font-weight:600;}
-.ttl-info{color:#555;font-size:12px;}
-.copy-link{cursor:pointer;color:#f15c2e;text-decoration:none;border-bottom:1px dashed #f15c2e;}
-.copy-link.copied:after{content:'已复制';margin-left:6px;color:#f15c2e;}`;
+export const baseCSS = `body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+      line-height: 1.6;
+      background: url('https://cf-assets.www.cloudflare.com/dzlvafdwdttg/5B5shLB8bSKIyB9NJ6R1jz/87e7617be2c61603d46003cb3f1bd382/Hero-globe-bg-takeover-xxl.png'),
+        linear-gradient(135deg, rgba(253, 101, 60, 0.85) 0%, rgba(251,152,30, 0.85) 100%);
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      padding: 30px 20px;
+      box-sizing: border-box;
+    }
+
+    .page-wrapper {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      margin: 20px auto;
+      background-color: rgba(255, 255, 255, 0.65);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    h1 {
+      /* 创建文字渐变效果 */
+      background-image: linear-gradient(to right, rgb(249, 171, 76), rgb(252, 103, 60));
+      /* 回退颜色，用于不支持渐变文本的浏览器 */
+      color: rgb(252, 103, 60);
+      -webkit-background-clip: text;
+      -moz-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      -moz-text-fill-color: transparent;
+      
+      font-weight: 600;
+      /* 注意：渐变文本和阴影效果同时使用可能不兼容，暂时移除阴影 */
+      text-shadow: none;
+    }
+
+    .card {
+      margin-bottom: 20px;
+      border: none;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      background-color: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    .card-header {
+      background-color: rgba(255, 242, 235, 0.9);
+      font-weight: 600;
+      padding: 12px 20px;
+      border-bottom: none;
+    }
+
+    .form-label {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: rgb(70, 50, 40);
+    }
+
+    .form-select,
+    .form-control {
+      border-radius: 6px;
+      padding: 10px;
+      border: 1px solid rgba(253, 101, 60, 0.3);
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+
+    .btn-primary {
+      background-color: rgb(253, 101, 60);
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: rgb(230, 90, 50);
+      transform: translateY(-1px);
+    }
+
+    pre {
+      background-color: rgba(255, 245, 240, 0.9);
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid rgba(253, 101, 60, 0.2);
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-family: Consolas, Monaco, 'Andale Mono', monospace;
+      font-size: 14px;
+      max-height: 400px;
+      overflow: auto;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left: 4px solid rgb(253, 101, 60);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    .badge {
+      margin-left: 5px;
+      font-size: 11px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+
+    .beian-info {
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .beian-info a {
+      color: var(--primary-color);
+      text-decoration: none;
+      border-bottom: 1px dashed var(--primary-color);
+      padding-bottom: 2px;
+    }
+
+    .beian-info a:hover {
+      border-bottom-style: solid;
+    }
+
+    @media (max-width: 576px) {
+      .container {
+        padding: 20px;
+      }
+
+      .github-corner:hover .octo-arm {
+        animation: none;
+      }
+
+      .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+    }
+
+    .error-message {
+      color: #e63e00;
+      margin-top: 10px;
+    }
+
+    .success-message {
+      color: #e67e22;
+    }
+
+    .nav-tabs .nav-link {
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+      padding: 8px 16px;
+      font-weight: 500;
+      color: rgb(150, 80, 50);
+    }
+
+    .nav-tabs .nav-link.active {
+      background-color: rgba(255, 245, 240, 0.8);
+      border-bottom-color: rgba(255, 245, 240, 0.8);
+      color: rgb(253, 101, 60);
+    }
+
+    .tab-content {
+      background-color: rgba(255, 245, 240, 0.8);
+      border-radius: 0 0 6px 6px;
+      padding: 15px;
+      border: 1px solid rgba(253, 101, 60, 0.2);
+      border-top: none;
+    }
+
+    .ip-record {
+      padding: 5px 10px;
+      margin-bottom: 5px;
+      border-radius: 4px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(253, 101, 60, 0.15);
+    }
+
+    .ip-record:hover {
+      background-color: rgba(255, 235, 225, 0.9);
+    }
+
+    .ip-address {
+      font-family: monospace;
+      font-weight: 600;
+      min-width: 130px;
+      color: rgb(80, 60, 50);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s ease;
+      display: inline-block;
+    }
+
+    .ip-address:hover {
+      color: rgb(253, 101, 60);
+    }
+
+    .ip-address:after {
+      content: '';
+      position: absolute;
+      left: 100%;  /* 从IP地址的右侧开始定位 */
+      top: 0;
+      opacity: 0;
+      white-space: nowrap;
+      font-size: 12px;
+      color: rgb(253, 101, 60);
+      transition: opacity 0.3s ease;
+      font-family: 'Segoe UI', sans-serif;
+      font-weight: normal;
+    }
+
+    .ip-address.copied:after {
+      content: '✓ 已复制';
+      opacity: 1;
+    }
+
+    .result-summary {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: rgba(255, 235, 225, 0.8);
+      border-radius: 6px;
+    }
+
+    .result-tabs {
+      margin-bottom: 20px;
+    }
+
+    .geo-info {
+      margin: 0 10px;
+      font-size: 0.85em;
+      flex-grow: 1;
+      text-align: center;
+    }
+
+    .geo-country {
+      color: rgb(230, 90, 50);
+      font-weight: 500;
+      padding: 2px 6px;
+      background-color: rgba(255, 245, 240, 0.8);
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .geo-as {
+      color: rgb(253, 101, 60);
+      padding: 2px 6px;
+      background-color: rgba(255, 245, 240, 0.8);
+      border-radius: 4px;
+      margin-left: 5px;
+      display: inline-block;
+    }
+
+    .geo-blocked {
+      color: #ffffff;
+      background-color: #dc3545;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      display: inline-block;
+      animation: pulse-red 2s infinite;
+    }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+
+    .geo-loading {
+      color: rgb(150, 100, 80);
+      font-style: italic;
+    }
+
+    .ttl-info {
+      min-width: 80px;
+      text-align: right;
+      color: rgb(180, 90, 60);
+    }
+
+    .copy-link {
+      color: rgb(253, 101, 60);
+      text-decoration: none;
+      border-bottom: 1px dashed rgb(253, 101, 60);
+      padding-bottom: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .copy-link:hover {
+      border-bottom-style: solid;
+    }
+
+    .copy-link:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -65px;
+      opacity: 0;
+      white-space: nowrap;
+      color: rgb(253, 101, 60);
+      font-size: 12px;
+      transition: opacity 0.3s ease;
+    }
+
+    .copy-link.copied:after {
+      content: '✓ 已复制';
+      opacity: 1;
+    }
+
+    .github-corner svg {
+      fill: rgb(255, 255, 255);
+      color: rgb(251,152,30);
+      position: absolute;
+      top: 0;
+      right: 0;
+      border: 0;
+      width: 80px;
+      height: 80px;
+    }
+
+    .github-corner:hover .octo-arm {
+      animation: octocat-wave 560ms ease-in-out;
+    }
+
+    /* 添加章鱼猫挥手动画关键帧 */
+    @keyframes octocat-wave {
+      0%, 100% { transform: rotate(0); }
+      20%, 60% { transform: rotate(-25deg); }
+      40%, 80% { transform: rotate(10deg); }
+    }
+
+    @media (max-width: 576px) {
+      .container {
+        padding: 20px;
+      }
+
+      .github-corner:hover .octo-arm {
+        animation: none;
+      }
+
+      .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+    }`;
