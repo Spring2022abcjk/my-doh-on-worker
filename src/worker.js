@@ -8,10 +8,9 @@ export default {
     if (env.DOH) {
       DoH = env.DOH;
       const match = DoH.match(/:\/\/([^\/]+)/);
-      if (match) DoH = match[1];
-      // 重新计算上游端点，确保实际查询使用新的 DoH 主机
-      jsonDoH = `https://${DoH}/resolve`;
-      dnsDoH = `https://${DoH}/dns-query`;
+      if (match) {
+        DoH = match[1];
+      }
     }
     DoH路径 = env.PATH || env.TOKEN || DoH路径; //DoH路径也单独设置 变量PATH
     if (DoH路径.includes("/")) DoH路径 = DoH路径.split("/")[1];
