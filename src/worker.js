@@ -1,8 +1,8 @@
 import { buildHTML } from "./htmlTemplate.js";
 let DoH = "cloudflare-dns.com"; // 展示用上游主机名
 let DoH路径 = "dns-query"; // Worker 暴露的路径令牌
-let jsonDoH = `https://${DoH}/resolve`;
-let dnsDoH = `https://${DoH}/dns-query`;
+const jsonDoH = `https://${DoH}/resolve`;
+const dnsDoH = `https://${DoH}/dns-query`;
 export default {
   async fetch(request, env) {
     if (env.DOH) {
@@ -273,12 +273,16 @@ export default {
     if (env.URL302) return Response.redirect(env.URL302, 302);
     else if (env.URL) {
       if (env.URL.toString().toLowerCase() == "nginx") {
-        return new Response(await nginx(), { headers: { "Content-Type": "text/html; charset=UTF-8" } });
+        return new Response(await nginx(), {
+          headers: { "Content-Type": "text/html; charset=UTF-8" },
+        });
       }
       return await 代理URL(env.URL, url);
     } else {
       const html = buildHTML({ dohPath: DoH路径, upstreamHost: DoH });
-      return new Response(html, { headers: { "Content-Type": "text/html; charset=UTF-8" } });
+      return new Response(html, {
+        headers: { "Content-Type": "text/html; charset=UTF-8" },
+      });
     }
   },
 };
@@ -363,20 +367,28 @@ async function queryDns(dohServer, domain, type) {
 async function handleLocalDohRequest(domain, type, hostname) {
   try {
     if (type === "all") {
+      // 同时请求 A、AAAA 和 NS 记录
       const ipv4Promise = queryDns(dnsDoH, domain, "A");
       const ipv6Promise = queryDns(dnsDoH, domain, "AAAA");
       const nsPromise = queryDns(dnsDoH, domain, "NS");
+
+      // 等待所有请求完成
       const [ipv4Result, ipv6Result, nsResult] = await Promise.all([
         ipv4Promise,
         ipv6Promise,
         nsPromise,
       ]);
+
+      // 准备NS记录数组
       const nsRecords = [];
+
+      // 从Answer和Authority部分收集NS记录
       if (nsResult.Answer && nsResult.Answer.length > 0) {
         nsRecords.push(
           ...nsResult.Answer.filter((record) => record.type === 2)
         );
       }
+
       if (nsResult.Authority && nsResult.Authority.length > 0) {
         nsRecords.push(
           ...nsResult.Authority.filter(
@@ -384,6 +396,8 @@ async function handleLocalDohRequest(domain, type, hostname) {
           )
         );
       }
+
+      // 合并结果
       const combinedResult = {
         Status: ipv4Result.Status || ipv6Result.Status || nsResult.Status,
         TC: ipv4Result.TC || ipv6Result.TC || nsResult.TC,
@@ -412,6 +426,7 @@ async function handleLocalDohRequest(domain, type, hostname) {
         },
       });
     } else {
+      // 普通的单类型查询
       const result = await queryDns(dnsDoH, domain, type);
       return new Response(JSON.stringify(result, null, 2), {
         headers: {
